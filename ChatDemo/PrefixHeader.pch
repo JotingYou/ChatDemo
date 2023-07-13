@@ -13,16 +13,14 @@
 // You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
 #ifdef __OBJC__
     #import <UIKit/UIKit.h>
-
-    #import "XMPPFramework.h"
 #endif
 
 
-#define kXMPP_HOST @"127.0.0.1"
+#define kXMPP_HOST @"139.196.179.154"
 #define kXMPP_PORT      5222
-#define kXMPP_DOMAIN    @"im.joker.cn"
+#define kXMPP_DOMAIN    @"safe.com"
 #define kXMPP_SUBDOMAIN @"group"
-#define kXMPP_RESOURCE  @"iOS"
+#define kXMPP_RESOURCE  @"phone"
 
 //*********************** 通知 *****************
 #define kLOGIN_SUCCESS      @"kLOGIN_SUCCESS"

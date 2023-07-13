@@ -239,7 +239,6 @@ static JKXMPPTool *_instance;
 
 - (void)xmppIncomingFileTransfer:(XMPPIncomingFileTransfer *)sender didSucceedWithData:(NSData *)data named:(NSString *)name
 {
-    XMPPJID *jid = [sender.senderJID copy];
     NSLog(@"%s",__FUNCTION__);
     //在这个方法里面，我们通过带外来传输的文件
     //因此我们的消息同步器，不会帮我们自动生成Message,因此我们需要手动存储message
@@ -250,9 +249,9 @@ static JKXMPPTool *_instance;
         return;
     }
     //创建一个XMPPMessage对象,message必须要有from
-    XMPPMessage *message = [XMPPMessage messageWithType:@"chat" to:jid];
+    XMPPMessage *message = [XMPPMessage messageWithType:@"chat" to:sender.xmppStream.myJID];
     //将这个文件的发送者添加到Message的from
-    [message addAttributeWithName:@"from" stringValue:sender.senderJID.bare];
+    [message addAttributeWithName:@"from" stringValue:sender.xmppStream.remoteJID.bare];
     [message addSubject:@"audio"];
     
     //保存data

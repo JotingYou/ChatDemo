@@ -41,8 +41,8 @@
     
     //    username = @"1051";
     //    password = @"209ab796311f470a98dbaa055b29523b";
-    username = @"1021";
-    password = @"SID:659816befbed4bc99cb225adfd285503";
+//    username = @"1021";
+//    password = @"SID:659816befbed4bc99cb225adfd285503";
     
     NSString *message = nil;
     if (username.length <= 0) {

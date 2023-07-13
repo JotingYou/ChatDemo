@@ -8,11 +8,7 @@
 
 #import "RoomsViewController.h"
 
-#import "XMPPRoom.h"
-#import "XMPPRoomHybridStorage.h"
-#import "XMPPRoomMemoryStorage.h"
 #import "JKXMPPTool.h"
-#import "XMPPRoom.h"
 
 @interface RoomsViewController ()
 

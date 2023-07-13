@@ -7,10 +7,10 @@
 //
 
 #import "ChatViewController.h"
-
+#import <AVFoundation/AVFoundation.h>
 #import "JKXMPPTool.h"
 
-@interface ChatViewController ()<XMPPOutgoingFileTransferDelegate>
+@interface ChatViewController ()<XMPPOutgoingFileTransferDelegate,AVAudioRecorderDelegate>
 
 @property (weak, nonatomic) IBOutlet UITableView *messageTableView;
 @property (weak, nonatomic) IBOutlet UIView *bottomView;
@@ -143,25 +143,52 @@
     path = [path stringByAppendingPathExtension:@"wav"];
     
     NSURL *URL = [NSURL fileURLWithPath:path];
-    _recorder = [[AVAudioRecorder alloc] initWithURL:URL settings:nil error:nil];
+    // 设置录音会话
+    AVAudioSession *session = [AVAudioSession sharedInstance];
+    [session setCategory:AVAudioSessionCategoryPlayAndRecord error:nil];
+    // 配置录音参数
+//    NSDictionary *settings = @{
+//        AVFormatIDKey : @(kAudioFormatMPEG4AAC),
+//        AVSampleRateKey : @(44100.0),
+//        AVNumberOfChannelsKey : @(2),
+//        AVEncoderBitRateKey : @(12800),
+//        AVLinearPCMBitDepthKey : @(16),
+//        AVLinearPCMIsBigEndianKey : @(NO),
+//        AVLinearPCMIsFloatKey : @(YES)
+//    };
+    NSError *err;
+    NSLog(@"URL = %@",URL);
+    _recorder = [[AVAudioRecorder alloc] initWithURL:URL settings:nil error:&err];
+    if(err){
+        NSLog(@"%@",err);
+    }
     [_recorder prepareToRecord];
+    _recorder.delegate = self;
+    [[AVAudioSession sharedInstance] setActive:YES error:&err];
+    if(err){
+        NSLog(@"%@",err);
+    }
     [_recorder record];
 }
 
 - (IBAction)sendRecord:(id)sender {
     [_recorder stop];
-    NSArray *resources = [[JKXMPPTool sharedInstance].xmppRosterMemoryStorage sortedResources:YES];
-    for (XMPPResourceMemoryStorageObject *object in resources) {
-        if ([object.jid.bare isEqualToString:self.chatJID.bare]) {
+//    NSArray *resources = [[JKXMPPTool sharedInstance].xmppRosterMemoryStorage sortedResources:YES];
+//    for (XMPPResourceMemoryStorageObject *object in resources) {
+//        if ([object.jid.bare isEqualToString:self.chatJID.bare]) {
             NSData *data = [[[NSData alloc] initWithContentsOfURL:_recorder.url] copy];
             NSError *err;
-            [self.xmppOutgoingFileTransfer sendData:data named:_recorder.url.lastPathComponent toRecipient:object.jid description:nil error:&err];
+    XMPPJID *jid = self.chatJID;
+    if (jid.resource == nil) {
+        jid = [XMPPJID jidWithUser:jid.user domain:jid.domain resource:@"phone"];
+    }
+            [self.xmppOutgoingFileTransfer sendData:data named:_recorder.url.lastPathComponent toRecipient:jid description:nil error:&err];
             if (err) {
                 NSLog(@"%@",err);
             }
-            break;
-        }
-    }
+//            break;
+//        }
+//    }
     
     _recorder = nil;
 }
@@ -265,6 +292,16 @@
     [message addBody:path.lastPathComponent];
     
     [[JKXMPPTool sharedInstance].xmppMessageArchivingCoreDataStorage archiveMessage:message outgoing:NO xmppStream:[JKXMPPTool sharedInstance].xmppStream];
+}
+#pragma mark - AVAudioRecorderDelegate
+
+// 录音完成后的回调方法
+- (void)audioRecorderDidFinishRecording:(AVAudioRecorder *)recorder successfully:(BOOL)flag {
+    if (flag) {
+        NSLog(@"录音完成");
+    } else {
+        NSLog(@"录音失败");
+    }
 }
 
 @end
